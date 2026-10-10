@@ -201,7 +201,7 @@ async function chamar(payload) {
   const resp = await fetch(WEBAPP_URL, {
     method: 'POST',
     redirect: 'follow',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify(payload)
   });
   return resp.json();
@@ -235,6 +235,7 @@ async function entrar(senha, automatico) {
     $('campoSenha').value = '';
     mostrarApp();
   } catch (e) {
+    console.error('Falha ao conectar com o Web App:', e);
     if (!automatico) $('loginErro').textContent = 'Não foi possível conectar. Verifique a internet e tente de novo.';
   } finally {
     $('btnEntrar').disabled = false;
