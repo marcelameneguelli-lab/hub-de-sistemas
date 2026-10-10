@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>HUB de Sistemas</title>
+<style>
+  :root {
+    --azul: #003B71;
+    --verde: #8DC63F;
+    --cinza-fundo: #F2F4F7;
+    --cinza-borda: #DDE2E8;
+    --texto: #1F2937;
+    --branco: #FFFFFF;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: var(--cinza-fundo);
+    color: var(--texto);
+  }
+  .oculto { display: none !important; }
+  header {
+    background: var(--azul);
+    color: var(--branco);
+    padding: 24px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  header h1 { margin: 0; font-size: 22px; }
+  header p { margin: 4px 0 0; font-size: 13px; opacity: 0.85; }
+  .header-acoes { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .selo {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.15);
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
+  .toolbar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; align-items: center; }
+  .toolbar input[type="text"] {
+    flex: 1; min-width: 200px; padding: 10px 12px;
+    border: 1px solid var(--cinza-borda); border-radius: 6px; font-size: 14px;
+  }
+  button { cursor: pointer; border: none; border-radius: 6px; padding: 10px 16px; font-size: 14px; font-weight: 600; }
+  button:disabled { opacity: 0.6; cursor: wait; }
+  .btn-primary { background: var(--verde); color: var(--azul); }
+  .btn-primary:hover { filter: brightness(0.95); }
+  .btn-secondary { background: var(--branco); color: var(--azul); border: 1px solid var(--azul); }
+  .btn-secondary:hover { background: #EAF1F8; }
+  .btn-sair { background: transparent; color: var(--branco); border: 1px solid rgba(255,255,255,0.6); padding: 8px 14px; }
+  .btn-sair:hover { background: rgba(255,255,255,0.12); }
+  .btn-danger { background: transparent; color: #B91C1C; padding: 6px 10px; font-size: 12px; }
+  .btn-edit { background: transparent; color: var(--azul); padding: 6px 10px; font-size: 12px; }
+  .categoria-bloco { margin-bottom: 28px; }
+  .categoria-titulo {
+    font-size: 15px; font-weight: 700; color: var(--azul);
+    border-bottom: 2px solid var(--verde); padding-bottom: 6px; margin-bottom: 14px;
+  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+  .card {
+    background: var(--branco); border: 1px solid var(--cinza-borda); border-radius: 8px;
+    padding: 16px; display: flex; flex-direction: column; gap: 8px; transition: box-shadow 0.15s;
+  }
+  .card:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+  .card-titulo { font-weight: 600; font-size: 15px; }
+  .card-desc { font-size: 13px; color: #6B7280; flex-grow: 1; }
+  .card-link {
+    display: inline-block; text-align: center; background: var(--azul); color: var(--branco);
+    text-decoration: none; padding: 8px 0; border-radius: 6px; font-size: 13px; font-weight: 600;
+  }
+  .card-link:hover { background: #002A54; }
+  .card-actions { display: flex; justify-content: flex-end; gap: 4px; }
+  .vazio { text-align: center; color: #6B7280; padding: 40px 0; font-size: 14px; }
+  .contador { font-size: 12px; color: #6B7280; margin-top: -14px; margin-bottom: 18px; }
+
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+    align-items: center; justify-content: center; z-index: 100;
+  }
+  .modal-overlay.aberto { display: flex; }
+  .modal { background: var(--branco); border-radius: 10px; padding: 24px; width: 90%; max-width: 420px; }
+  .modal h2 { margin-top: 0; font-size: 17px; color: var(--azul); }
+  .campo { margin-bottom: 14px; }
+  .campo label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .campo input, .campo textarea {
+    width: 100%; padding: 8px 10px; border: 1px solid var(--cinza-borda);
+    border-radius: 6px; font-size: 14px; font-family: inherit;
+  }
+  .campo textarea { resize: vertical; min-height: 50px; }
+  .modal-botoes { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+
+  /* Tela de login */
+  #telaLogin {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: var(--azul); padding: 20px;
+  }
+  .login-caixa {
+    background: var(--branco); border-radius: 12px; padding: 32px;
+    width: 100%; max-width: 360px; text-align: center;
+  }
+  .login-caixa h1 { margin: 0 0 4px; font-size: 22px; color: var(--azul); }
+  .login-caixa p { margin: 0 0 20px; font-size: 13px; color: #6B7280; }
+  .login-caixa input {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--cinza-borda);
+    border-radius: 6px; font-size: 15px; margin-bottom: 12px;
+  }
+  .login-caixa button { width: 100%; }
+  .login-erro { color: #B91C1C; font-size: 13px; min-height: 18px; margin-bottom: 10px; }
+  .login-autoria { margin-top: 18px; font-size: 12px; color: #9CA3AF; }
+</style>
+</head>
+<body>
+
+<div id="telaLogin">
+  <div class="login-caixa">
+    <h1>HUB de Sistemas</h1>
+    <p>Digite a senha para acessar</p>
+    <input type="password" id="campoSenha" placeholder="Senha" autocomplete="current-password">
+    <div class="login-erro" id="loginErro"></div>
+    <button class="btn-primary" id="btnEntrar">Entrar</button>
+    <div class="login-autoria">por Marcela Meneguelli</div>
+  </div>
+</div>
+
+<div id="app" class="oculto">
+  <header>
+    <div>
+      <h1>HUB de Sistemas</h1>
+      <p>Acesso rápido a todos os painéis e sistemas &bull; por Marcela Meneguelli</p>
+    </div>
+    <div class="header-acoes">
+      <span class="selo" id="seloNivel"></span>
+      <button class="btn-primary somente-edicao" id="btnAdicionar">+ Adicionar ferramenta</button>
+      <button class="btn-sair" id="btnSair">Sair</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="toolbar">
+      <input type="text" id="busca" placeholder="Buscar ferramenta...">
+      <button class="btn-secondary somente-edicao" id="btnExportar">Exportar backup</button>
+      <button class="btn-secondary somente-edicao" id="btnImportar">Importar backup</button>
+      <input type="file" id="inputImportar" accept=".json" style="display:none">
+    </div>
+    <div class="contador" id="contador"></div>
+    <div id="conteudo"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2 id="modalTitulo">Adicionar ferramenta</h2>
+    <input type="hidden" id="editandoId">
+    <div class="campo">
+      <label>Nome</label>
+      <input type="text" id="campoNome" placeholder="Ex: Central de Acionamento">
+    </div>
+    <div class="campo">
+      <label>Link</label>
+      <input type="text" id="campoLink" placeholder="https://...">
+    </div>
+    <div class="campo">
+      <label>Categoria</label>
+      <input type="text" id="campoCategoria" placeholder="Ex: Renovação, Financeiro, Relatórios">
+    </div>
+    <div class="campo">
+      <label>Descrição (opcional)</label>
+      <textarea id="campoDesc" placeholder="Uma linha sobre o que essa ferramenta faz"></textarea>
+    </div>
+    <div class="modal-botoes">
+      <button class="btn-secondary" id="btnCancelar">Cancelar</button>
+      <button class="btn-primary" id="btnSalvar">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Cole aqui a URL do Web App do Apps Script
+const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbznV2fIPN1JqTE1DSwYtOELoAJ40hSC4IWwCmwwBPijalXBh532RLxBzaUPwjvuZ_Pt3A/exec';
+
+// A senha fica só na sessão da aba e some ao fechar. Os links nunca são guardados no navegador.
+const CHAVE_SESSAO = 'hub_sistemas_senha';
+
+let ferramentas = [];
+let nivel = null;
+let senhaAtual = '';
+
+const $ = id => document.getElementById(id);
+
+function configurado() {
+  return WEBAPP_URL.indexOf('COLE_AQUI') === -1;
+}
+
+async function chamar(payload) {
+  const resp = await fetch(WEBAPP_URL, {
+    method: 'POST',
+    redirect: 'follow',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  return resp.json();
+}
+
+function mensagemErro(codigo) {
+  if (codigo === 'senha') return 'Senha incorreta.';
+  if (codigo === 'bloqueado') return 'Muitas tentativas erradas. Aguarde 15 minutos e tente de novo.';
+  if (codigo === 'sem_permissao') return 'Sua senha não permite alterar os dados.';
+  return 'Não foi possível concluir. Tente novamente.';
+}
+
+async function entrar(senha, automatico) {
+  if (!configurado()) {
+    $('loginErro').textContent = 'Falta configurar a URL do Web App no arquivo.';
+    return;
+  }
+  $('btnEntrar').disabled = true;
+  $('loginErro').textContent = '';
+  try {
+    const r = await chamar({ acao: 'listar', senha: senha });
+    if (!r.ok) {
+      sessionStorage.removeItem(CHAVE_SESSAO);
+      if (!automatico) $('loginErro').textContent = mensagemErro(r.erro);
+      return;
+    }
+    senhaAtual = senha;
+    nivel = r.nivel;
+    ferramentas = r.ferramentas || [];
+    try { sessionStorage.setItem(CHAVE_SESSAO, senha); } catch (e) {}
+    $('campoSenha').value = '';
+    mostrarApp();
+  } catch (e) {
+    if (!automatico) $('loginErro').textContent = 'Não foi possível conectar. Verifique a internet e tente de novo.';
+  } finally {
+    $('btnEntrar').disabled = false;
+  }
+}
+
+function mostrarApp() {
+  $('telaLogin').classList.add('oculto');
+  $('app').classList.remove('oculto');
+  $('seloNivel').textContent = nivel === 'edicao' ? 'Modo edição' : 'Somente leitura';
+  document.querySelectorAll('.somente-edicao').forEach(el => {
+    el.classList.toggle('oculto', nivel !== 'edicao');
+  });
+  renderizar();
+}
+
+function sair() {
+  try { sessionStorage.removeItem(CHAVE_SESSAO); } catch (e) {}
+  senhaAtual = '';
+  nivel = null;
+  ferramentas = [];
+  $('conteudo').innerHTML = '';
+  $('app').classList.add('oculto');
+  $('telaLogin').classList.remove('oculto');
+  $('campoSenha').focus();
+}
+
+async function salvarNaPlanilha(lista) {
+  try {
+    const r = await chamar({ acao: 'salvar', senha: senhaAtual, ferramentas: lista });
+    if (!r.ok) {
+      alert(mensagemErro(r.erro));
+      return false;
+    }
+    return true;
+  } catch (e) {
+    alert('Não foi possível salvar. Verifique a internet e tente de novo.');
+    return false;
+  }
+}
+
+function abrirModal(id) {
+  $('modalOverlay').classList.add('aberto');
+  if (id) {
+    const item = ferramentas.find(f => f.id === id);
+    $('modalTitulo').textContent = 'Editar ferramenta';
+    $('editandoId').value = id;
+    $('campoNome').value = item.nome;
+    $('campoLink').value = item.link;
+    $('campoCategoria').value = item.categoria;
+    $('campoDesc').value = item.desc || '';
+  } else {
+    $('modalTitulo').textContent = 'Adicionar ferramenta';
+    $('editandoId').value = '';
+    $('campoNome').value = '';
+    $('campoLink').value = '';
+    $('campoCategoria').value = '';
+    $('campoDesc').value = '';
+  }
+}
+
+function fecharModal() {
+  $('modalOverlay').classList.remove('aberto');
+}
+
+async function salvarFerramenta() {
+  const nome = $('campoNome').value.trim();
+  let link = $('campoLink').value.trim();
+  const categoria = $('campoCategoria').value.trim() || 'Geral';
+  const desc = $('campoDesc').value.trim();
+  const editandoId = $('editandoId').value;
+
+  if (!nome || !link) {
+    alert('Preencha ao menos o nome e o link.');
+    return;
+  }
+  if (!/^https?:\/\//i.test(link)) {
+    link = 'https://' + link;
+  }
+
+  let novaLista;
+  if (editandoId) {
+    novaLista = ferramentas.map(f => f.id === editandoId ? { id: f.id, nome, link, categoria, desc } : f);
+  } else {
+    novaLista = ferramentas.concat([{ id: Date.now().toString(), nome, link, categoria, desc }]);
+  }
+
+  $('btnSalvar').disabled = true;
+  const ok = await salvarNaPlanilha(novaLista);
+  $('btnSalvar').disabled = false;
+  if (ok) {
+    ferramentas = novaLista;
+    fecharModal();
+    renderizar();
+  }
+}
+
+async function excluirFerramenta(id) {
+  if (!confirm('Excluir esta ferramenta do hub?')) return;
+  const novaLista = ferramentas.filter(f => f.id !== id);
+  const ok = await salvarNaPlanilha(novaLista);
+  if (ok) {
+    ferramentas = novaLista;
+    renderizar();
+  }
+}
+
+function exportarDados() {
+  const blob = new Blob([JSON.stringify(ferramentas, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'hub_sistemas_backup.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importarDados(event) {
+  const arquivo = event.target.files[0];
+  if (!arquivo) return;
+  const leitor = new FileReader();
+  leitor.onload = async function(e) {
+    try {
+      const importados = JSON.parse(e.target.result);
+      if (!Array.isArray(importados)) throw new Error('Formato inválido');
+      if (!confirm('Isso vai substituir todas as ferramentas atuais pelas do backup. Continuar?')) return;
+      const ok = await salvarNaPlanilha(importados);
+      if (ok) {
+        ferramentas = importados;
+        renderizar();
+        alert('Backup importado com sucesso.');
+      }
+    } catch (err) {
+      alert('Não foi possível importar o arquivo. Verifique se é um backup válido.');
+    }
+  };
+  leitor.readAsText(arquivo);
+  event.target.value = '';
+}
+
+function renderizar() {
+  const termo = $('busca').value.trim().toLowerCase();
+  const conteudo = $('conteudo');
+  conteudo.innerHTML = '';
+
+  const filtradas = ferramentas.filter(f =>
+    f.nome.toLowerCase().includes(termo) ||
+    (f.desc || '').toLowerCase().includes(termo) ||
+    f.categoria.toLowerCase().includes(termo)
+  );
+
+  $('contador').textContent = ferramentas.length + ' ferramenta(s) cadastrada(s)';
+
+  if (filtradas.length === 0) {
+    const vazio = document.createElement('div');
+    vazio.className = 'vazio';
+    vazio.textContent = nivel === 'edicao'
+      ? 'Nenhuma ferramenta encontrada. Clique em "+ Adicionar ferramenta" para começar.'
+      : 'Nenhuma ferramenta encontrada.';
+    conteudo.appendChild(vazio);
+    return;
+  }
+
+  const categorias = {};
+  filtradas.forEach(f => {
+    if (!categorias[f.categoria]) categorias[f.categoria] = [];
+    categorias[f.categoria].push(f);
+  });
+
+  Object.keys(categorias).sort().forEach(cat => {
+    const bloco = document.createElement('div');
+    bloco.className = 'categoria-bloco';
+
+    const titulo = document.createElement('div');
+    titulo.className = 'categoria-titulo';
+    titulo.textContent = cat;
+    bloco.appendChild(titulo);
+
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+
+    categorias[cat].forEach(f => {
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      const t = document.createElement('div');
+      t.className = 'card-titulo';
+      t.textContent = f.nome;
+      card.appendChild(t);
+
+      if (f.desc) {
+        const d = document.createElement('div');
+        d.className = 'card-desc';
+        d.textContent = f.desc;
+        card.appendChild(d);
+      }
+
+      const a = document.createElement('a');
+      a.className = 'card-link';
+      a.textContent = 'Abrir';
+      if (/^https?:\/\//i.test(f.link)) a.href = f.link;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      card.appendChild(a);
+
+      if (nivel === 'edicao') {
+        const acoes = document.createElement('div');
+        acoes.className = 'card-actions';
+
+        const bEditar = document.createElement('button');
+        bEditar.className = 'btn-edit';
+        bEditar.textContent = 'Editar';
+        bEditar.addEventListener('click', () => abrirModal(f.id));
+
+        const bExcluir = document.createElement('button');
+        bExcluir.className = 'btn-danger';
+        bExcluir.textContent = 'Excluir';
+        bExcluir.addEventListener('click', () => excluirFerramenta(f.id));
+
+        acoes.appendChild(bEditar);
+        acoes.appendChild(bExcluir);
+        card.appendChild(acoes);
+      }
+
+      grid.appendChild(card);
+    });
+
+    bloco.appendChild(grid);
+    conteudo.appendChild(bloco);
+  });
+}
+
+$('btnEntrar').addEventListener('click', () => entrar($('campoSenha').value, false));
+$('campoSenha').addEventListener('keydown', e => { if (e.key === 'Enter') entrar($('campoSenha').value, false); });
+$('btnSair').addEventListener('click', sair);
+$('btnAdicionar').addEventListener('click', () => abrirModal());
+$('btnCancelar').addEventListener('click', fecharModal);
+$('btnSalvar').addEventListener('click', salvarFerramenta);
+$('busca').addEventListener('input', renderizar);
+$('btnExportar').addEventListener('click', exportarDados);
+$('btnImportar').addEventListener('click', () => $('inputImportar').click());
+$('inputImportar').addEventListener('change', importarDados);
+
+(function iniciar() {
+  let salva = null;
+  try { salva = sessionStorage.getItem(CHAVE_SESSAO); } catch (e) {}
+  if (salva) entrar(salva, true);
+  else $('campoSenha').focus();
+})();
+</script>
+
+</body>
+</html>
